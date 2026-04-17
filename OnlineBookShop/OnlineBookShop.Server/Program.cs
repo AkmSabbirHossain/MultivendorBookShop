@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. EF Core + DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
     ));
