@@ -367,7 +367,7 @@ namespace OnlineBookShop.Server.DTOs
     public class WishlistItemResponseDto
     {
         public int BookId { get; set; }
-        public string Title { get; set; }
+        public string ?Title { get; set; }
         public string? CoverImageUrl { get; set; }
     }
 
