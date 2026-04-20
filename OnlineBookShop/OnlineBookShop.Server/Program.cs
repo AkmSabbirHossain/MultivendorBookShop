@@ -14,24 +14,19 @@ using OnlineBookShop.Server.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ================================================
-// Add services to the container.
-// ================================================
-
-// 1. EF Core + DbContext
+//  EF Core + DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
     ));
 
-// 2. ASP.NET Identity
+// ASP.NET Identity
 builder.Services.AddIdentity<AppUser, IdentityRole<int>>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// 3. Authentication (JWT)
+// Authentication (JWT)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -52,14 +47,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 4. Authorization
+// Authorization
 builder.Services.AddAuthorization();
 
-// 5. Repository & UnitOfWork
+// Repository & UnitOfWork
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// 6. Services
+//  Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -72,10 +67,10 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IOrderStatusHistoryService, OrderStatusHistoryService>();
 builder.Services.AddScoped<IStockHistoryService, StockHistoryService>();
 
-// 7. AutoMapper
+//  AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// 8. CORS
+//  CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
@@ -87,7 +82,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 9. Controllers + Swagger
+// Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -123,29 +118,18 @@ builder.Services.AddSwaggerGen(c =>
 // ================================================
 // Build & Configure the HTTP pipeline
 // ================================================
-
 var app = builder.Build();
-
-// ====================== Apply Migrations + Seed Data ======================
-// এই অংশটুকু নতুন যোগ করা হয়েছে
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-
-    // 1. Apply Migrations (টেবিল তৈরি করবে)
     await dbContext.Database.MigrateAsync();
 
-    // 2. Seed Roles
+    // Seed Roles
     await RoleSeeder.SeedRolesAsync(roleManager);
-
-    // 3. Initial Data Seeding (যদি InitialDataSeeder থাকে)
     await InitialDataSeeder.SeedAsync(userManager, roleManager, dbContext);
 }
-
-// ====================== Middleware Pipeline ======================
-
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
